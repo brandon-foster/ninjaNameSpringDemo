@@ -9,9 +9,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import demo.spring.model.NameRequestModel;
 import demo.spring.service.NameService;
 
 @Controller
@@ -28,19 +28,17 @@ public class HelloController {
 
 	@ResponseBody
 	@RequestMapping(value = { "", "/" }, method = RequestMethod.POST)
-	public Map<String, String> getNinjaName(
-			@RequestParam("firstName") String firstName,
-			@RequestParam("lastName") String lastName,
-			@RequestParam("nameType") String nameType) {
+	public Map<String, String> getNinjaName(NameRequestModel model) {
 		
 		Map<String, String> names = new HashMap<String, String>();
 
-		NameService requestedService = getNameService(nameType);
+		NameService requestedService = getNameService(model.getNameType());
 		if (requestedService == null) {
 			names.put("error", "Service for provided nameType not found");
 		}
 		else {
-			names.put("name", requestedService.getName(firstName, lastName));
+			names.put("name", requestedService.getName(model.getFirstName(), 
+					model.getLastName()));
 		}
 		
 		return names;
