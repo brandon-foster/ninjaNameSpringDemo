@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,14 +10,28 @@
 
 <h1>Hello from Spring!</h1>
 <form>
-    What's your first name? &nbsp; <input type="text" name="firstName" />
-    <br />
-    What's your last name? &nbsp; <input type="text" name="lastName" />
-    <br />
+
+    <div>
+        What type of name do you want?
+	    <select name="nameType">
+	       <c:forEach items="${names}" var="name">
+	           <option value="${name.key}">${name.value}</option>
+	       </c:forEach>
+	    </select>
+    </div>
+    
+    <div>
+        What's your first name? &nbsp; <input type="text" name="firstName" />
+    </div>
+    
+    <div>
+        What's your last name? &nbsp; <input type="text" name="lastName" />
+    </div>
+    
     <input type="submit" value="Get your name" />
     
-    <div id="ninjaNameDisplay" style="display:none;">
-        Your ninja name is <strong></strong>.
+    <div id="nameDisplay" style="display:none;">
+        Your requested name is <strong></strong>.
     </div>
 </form>
 </body>

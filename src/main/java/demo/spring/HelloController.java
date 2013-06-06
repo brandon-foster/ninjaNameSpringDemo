@@ -1,25 +1,28 @@
 package demo.spring;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import demo.spring.service.NinjaNameService;
+import demo.spring.service.NameService;
 
 @Controller
 public class HelloController {
 
-	private NinjaNameService ninjaNameService;
+	private List<NameService> nameServices;
 
 	@RequestMapping(value = { "", "/" }, method = RequestMethod.GET)
-	public String getIndex() {
-		System.out.println("HI THERE");
+	public String getIndex(Model model) {
+		Map<String, String> names = getSupportedNames();
+		model.addAttribute("names", names);
 		return "index";
 	}
 
@@ -27,14 +30,40 @@ public class HelloController {
 	@RequestMapping(value = { "", "/" }, method = RequestMethod.POST)
 	public Map<String, String> getNinjaName(
 			@RequestParam("firstName") String firstName,
-			@RequestParam("lastName") String lastName) {
+			@RequestParam("lastName") String lastName,
+			@RequestParam("nameType") String nameType) {
+		
 		Map<String, String> names = new HashMap<String, String>();
-		names.put("name", ninjaNameService.getNinjaName(firstName, lastName));
+
+		NameService requestedService = getNameService(nameType);
+		if (requestedService == null) {
+			names.put("error", "Service for provided nameType not found");
+		}
+		else {
+			names.put("name", requestedService.getName(firstName, lastName));
+		}
+		
 		return names;
+	}
+	
+	private Map<String, String> getSupportedNames() {
+		Map<String, String> names = new HashMap<String, String>();
+		for (NameService service : nameServices) {
+			names.putAll(service.getNames());
+		}
+		return names;
+	}
+	
+	private NameService getNameService(String nameType) {
+		for (NameService service : nameServices) {
+			if (service.supports(nameType))
+				return service;
+		}
+		return  null;
 	}
 
 	@Autowired
-	public void setNinjaNameService(NinjaNameService ninjaNameService) {
-		this.ninjaNameService = ninjaNameService;
+	public void setNameServices(List<NameService> nameServices) {
+		this.nameServices = nameServices;
 	}
 }
